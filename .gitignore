@@ -1,0 +1,9 @@
+.env
+.env.local
+profile_local.py
+logs/
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+venv/
