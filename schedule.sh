@@ -1,10 +1,10 @@
 #!/bin/bash
-# schedule.sh — Install or uninstall the Wise Glade daily launchd job (macOS)
+# schedule.sh — Install or uninstall the Oppo Research daily launchd job (macOS)
 # Usage:
 #   bash schedule.sh install    # Runs agent.py every morning at 8:00am
 #   bash schedule.sh uninstall  # Removes the scheduled job
 
-PLIST_LABEL="com.wiseglade.agent"
+PLIST_LABEL="com.opporesearch.agent"
 PLIST_PATH="$HOME/Library/LaunchAgents/$PLIST_LABEL.plist"
 AGENT_DIR="$(cd "$(dirname "$0")" && pwd)"
 LOG_DIR="$AGENT_DIR/logs"
@@ -12,7 +12,7 @@ PYTHON_BIN="$(which python3)"
 
 case "${1:-}" in
   install)
-    echo "Installing Wise Glade daily job..."
+    echo "Installing Oppo Research daily job..."
     mkdir -p "$LOG_DIR"
 
     cat > "$PLIST_PATH" <<PLIST
@@ -37,9 +37,9 @@ case "${1:-}" in
     <integer>0</integer>
   </dict>
   <key>StandardOutPath</key>
-  <string>$LOG_DIR/wise-glade.log</string>
+  <string>$LOG_DIR/oppo-research.log</string>
   <key>StandardErrorPath</key>
-  <string>$LOG_DIR/wise-glade.error.log</string>
+  <string>$LOG_DIR/oppo-research.error.log</string>
   <key>RunAtLoad</key>
   <false/>
 </dict>
@@ -47,10 +47,10 @@ case "${1:-}" in
 PLIST
 
     launchctl load "$PLIST_PATH"
-    echo "Done. Wise Glade will run every morning at 8:00am."
-    echo "Logs: $LOG_DIR/wise-glade.log"
+    echo "Done. Oppo Research will run every morning at 8:00am."
+    echo "Logs: $LOG_DIR/oppo-research.log"
     echo ""
-    echo "To verify: launchctl list | grep wiseglade"
+    echo "To verify: launchctl list | grep opporesearch"
     echo "To run now: python3 $AGENT_DIR/agent.py --dry-run"
     ;;
 
@@ -58,7 +58,7 @@ PLIST
     if [ -f "$PLIST_PATH" ]; then
       launchctl unload "$PLIST_PATH"
       rm "$PLIST_PATH"
-      echo "Wise Glade daily job removed."
+      echo "Oppo Research daily job removed."
     else
       echo "No scheduled job found at $PLIST_PATH"
     fi

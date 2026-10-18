@@ -1,7 +1,8 @@
 """
-agent.py — Wise Glade
-Daily job intelligence agent. Surfaces newly-funded companies with open Strategy/Ops/GTM/Product
-roles, deep-researches each opportunity, and generates candidate-specific differentiated positioning.
+agent.py — Oppo Research
+Daily job intelligence agent. Surfaces newly-funded companies with open roles matching
+whatever you target in config.py (defaults to Strategy/Ops/GTM/Product, fully customizable),
+deep-researches each opportunity, and generates candidate-specific differentiated positioning.
 
 Run:
   python agent.py --dry-run     # Full pipeline, prints digest, no email sent
@@ -134,7 +135,7 @@ For each relevant role return a JSON object with:
 - location: location if mentioned, else "Remote" or "Unknown" (string)
 - seniority: "IC", "Senior", "Lead", "Manager", "Director", "VP", "Head", or "C-Level" (string)
 
-Return a JSON array. Only include strategy/ops/product/GTM roles. Skip engineering, design, data science, finance, legal, HR.
+Return a JSON array. Only include roles that match the target keywords above and don't match any exclude keyword.
 
 Search results:
 {context}"""
@@ -289,13 +290,13 @@ SAMPLE_OPPORTUNITY = {
 
 def run(dry_run: bool = False, test_email: bool = False) -> None:
     print(f"\n{'='*60}")
-    print(f"  WISE GLADE — {datetime.now().strftime('%B %d, %Y %I:%M %p')}")
+    print(f"  OPPO RESEARCH — {datetime.now().strftime('%B %d, %Y %I:%M %p')}")
     print(f"{'='*60}\n")
 
     if test_email:
         print("[test-email] Composing sample digest...")
         html = compose_html_email([SAMPLE_OPPORTUNITY], datetime.now())
-        subject = f"[TEST] Wise Glade — {datetime.now().strftime('%B %d')}"
+        subject = f"[TEST] Oppo Research — {datetime.now().strftime('%B %d')}"
         if dry_run:
             print("[test-email] --dry-run active: would send test email but skipping")
             print(f"Subject: {subject}")
@@ -346,7 +347,7 @@ def run(dry_run: bool = False, test_email: bool = False) -> None:
         print("\n  No companies or new watchlist postings found today.")
         html = compose_html_email([], datetime.now())
         if not dry_run:
-            send_email(html, subject=f"Wise Glade — No opportunities — {datetime.now().strftime('%B %d')}")
+            send_email(html, subject=f"Oppo Research — No opportunities — {datetime.now().strftime('%B %d')}")
         return
 
     total = min(len(work_queue), MAX_COMPANIES_PER_RUN)
@@ -405,7 +406,7 @@ def run(dry_run: bool = False, test_email: bool = False) -> None:
     print(f"\n{len(opportunities)} opportunities above fit threshold ({MIN_FIT_SCORE_TO_INCLUDE}/10)")
 
     html = compose_html_email(opportunities, datetime.now())
-    subject = f"Wise Glade — {len(opportunities)} opportunit{'y' if len(opportunities) == 1 else 'ies'} — {datetime.now().strftime('%B %d')}"
+    subject = f"Oppo Research — {len(opportunities)} opportunit{'y' if len(opportunities) == 1 else 'ies'} — {datetime.now().strftime('%B %d')}"
 
     if dry_run:
         print("\n[dry-run] Digest summary (email not sent):")
@@ -423,7 +424,7 @@ def run(dry_run: bool = False, test_email: bool = False) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Wise Glade — Daily job intelligence agent")
+    parser = argparse.ArgumentParser(description="Oppo Research — Daily job intelligence agent")
     parser.add_argument("--dry-run", action="store_true", help="Run full pipeline, print digest, skip email")
     parser.add_argument("--test-email", action="store_true", help="Send a test email with sample data")
     args = parser.parse_args()

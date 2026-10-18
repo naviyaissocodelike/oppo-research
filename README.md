@@ -1,9 +1,10 @@
-# Wise Glade
+# Oppo Research
 
 A daily job-intelligence agent. It finds newly-funded companies and tracks a watchlist of
-companies you care about, pulls their open Strategy / Ops / GTM / Product roles, researches
-each company, and emails you an HTML digest with positioning angles tailored to *your*
-background — not generic cover-letter filler.
+companies you care about, pulls their open roles matching whatever you target (Strategy /
+Ops / GTM / Product by default — fully customizable to any field or function, see
+"Repurposing" below), researches each company, and emails you an HTML digest with positioning
+angles tailored to *your* background — not generic cover-letter filler.
 
 This repo is a sanitized template: no one's personal data is committed to it. Fork it,
 plug in your own background, and it's yours.
@@ -22,10 +23,10 @@ sent anywhere. If that runs, you're ready for the real setup below.
 
 ## What it actually does
 
-1. **Funding discovery** — free RSS feeds (TechCrunch, Crunchbase News, VentureBeat, CoinDesk, etc.) find companies that just raised money, across AI, fintech, crypto, and AI-for-good. Tavily search supplements this if you set it up, but RSS alone gets you real results.
+1. **Funding discovery** — free RSS feeds (TechCrunch, Crunchbase News, VentureBeat, CoinDesk, etc. by default — swap for any industry's trade press) find companies that just raised money. Tavily search supplements this if you set it up, but RSS alone gets you real results.
 2. **Watchlist polling** — a list of companies you name in `config.py` gets checked daily for new postings, regardless of funding news.
 3. **Job search** — checks Greenhouse/Lever/Ashby's free public job-board APIs directly first (structured data, full job descriptions, no scraping). Falls back to a Tavily search only for the companies not on one of those three platforms.
-4. **Role filtering** — keeps Strategy/Ops/GTM/Product/Partnerships roles, drops everything else, by keyword (`config.py`).
+4. **Role filtering** — keeps whatever role titles you define in `config.py` (defaults to Strategy/Ops/GTM/Product/Partnerships), drops everything else, purely by keyword — no hardcoded role category baked into the code, on either the direct-API or Tavily-fallback path.
 5. **Company research** — pulls a product/traction/investor snapshot per company, via Tavily (the one piece that doesn't have a free structured-API equivalent).
 6. **Positioning** — an LLM reads your profile (`profile_local.py`, never committed) and writes 1-2 sentences on why *you specifically* fit each role, plus a 1-10 fit score.
 7. **Email digest** — one clean HTML email, sorted by fit score.
@@ -145,7 +146,9 @@ Edit `profile_local.py` for your background and target roles — see step 2 abov
 ## Repurposing for a different field or function
 
 Nothing about this agent is fintech/AI-specific by design — the whole watchlist, role
-filter, and news sources are just data in `config.py`. To retarget it:
+filter, and news sources are just data in `config.py`, and role filtering (both the direct
+ATS-API path and the Tavily-fallback path) is purely keyword-driven, with no hardcoded role
+category anywhere in the code. To retarget it:
 
 1. **`profile_local.py`** — your own background (see step 2 above).
 2. **`config.py` → `WATCHLIST_COMPANIES`** — swap in companies in your target field.
@@ -155,25 +158,17 @@ filter, and news sources are just data in `config.py`. To retarget it:
    | Field | Add to `TARGET_ROLE_KEYWORDS` | Watch out for in `EXCLUDE_ROLE_KEYWORDS` |
    |---|---|---|
    | Credit / lending | `credit`, `underwriting`, `risk`, `collections`, `lending`, `portfolio` | **Remove `analyst` and `finance`** — the defaults exclude both, which blocks most actual credit titles ("Credit Analyst," "Risk Analyst," "Finance Manager") |
-   | Comms / PR | `communications`, `comms`, `public relations`, `content`, `brand`, `corporate affairs` | Defaults don't conflict — but see the hardcoded-prompt note below |
+   | Comms / PR | `communications`, `comms`, `public relations`, `content`, `brand`, `corporate affairs` | Defaults don't conflict |
    | Account Executive / BD (any industry) | `account executive`, `business development`, `origination`, `sales`, `development` | Defaults don't conflict |
 
 4. **`config.py` → `FUNDING_SEARCH_QUERIES` / `FUNDING_RSS_FEEDS`** — swap to sources that
    actually cover your field (energy/climate trade press instead of TechCrunch/CoinDesk, for
    example). Check a feed actually returns results in a real run's logs before relying on it —
    a dead or renamed URL is skipped silently, not fatal, but also silently gives you nothing.
-5. **`agent.py` → `parse_job_listings()`** — one hardcoded line the config lists don't reach:
-   `"Only include strategy/ops/product/GTM roles. Skip engineering, design, data science,
-   finance, legal, HR."` This only fires on the Tavily-fallback path (companies not on
-   Greenhouse/Lever/Ashby — a meaningful minority of watchlist companies in practice), but since
-   it's hardcoded independent of `TARGET_ROLE_KEYWORDS`, a credit-focused fork still needs this
-   edited (it explicitly skips "finance"), and a comms or BD/AE fork should loosen
-   "strategy/ops/product/GTM" to match their actual target roles — otherwise relevant roles get
-   filtered out on that fallback path even after `config.py` is fixed.
-6. **`config.py` → `EXCLUDE_SECTORS`** — a quick check that nothing here accidentally excludes
+5. **`config.py` → `EXCLUDE_SECTORS`** — a quick check that nothing here accidentally excludes
    your field (none of the defaults block credit, comms, or energy, but worth a glance if you're
    going somewhere more unusual).
-7. Test with `python agent.py --dry-run` before scheduling anything — see "Test before you
+6. Test with `python agent.py --dry-run` before scheduling anything — see "Test before you
    trust it" above.
 
 ## Files

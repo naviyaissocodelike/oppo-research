@@ -85,7 +85,7 @@ def compose_html_email(opportunities: list[dict], run_date: datetime) -> str:
 
     <!-- Header -->
     <div style="text-align:center; margin-bottom:36px;">
-      <div style="font-size:26px; font-weight:800; color:#111827; letter-spacing:-0.5px;">Wise Glade</div>
+      <div style="font-size:26px; font-weight:800; color:#111827; letter-spacing:-0.5px;">Oppo Research</div>
       <div style="font-size:14px; color:#6b7280; margin-top:6px;">
         {date_str} &nbsp;·&nbsp; {count} opportunit{'y' if count == 1 else 'ies'} found
       </div>
@@ -95,7 +95,7 @@ def compose_html_email(opportunities: list[dict], run_date: datetime) -> str:
 
     <!-- Footer -->
     <div style="text-align:center; font-size:12px; color:#9ca3af; margin-top:28px; line-height:1.6;">
-      Wise Glade runs daily at 8am &nbsp;·&nbsp; Built on GPT-4o + Tavily
+      Oppo Research &nbsp;·&nbsp; Automated job intelligence
     </div>
 
   </div>

@@ -46,6 +46,15 @@ def _get_client() -> TavilyClient:
     return _client
 
 
+def _role_query_phrase(limit: int = 5) -> str:
+    """
+    A short free-text phrase built from TARGET_ROLE_KEYWORDS for use in Tavily search queries,
+    so the fallback job search actually looks for whatever roles config.py targets instead of
+    a category hardcoded into the query string.
+    """
+    return " ".join(TARGET_ROLE_KEYWORDS[:limit])
+
+
 def fetch_funding_rss() -> list[dict]:
     """
     Pull recent funding-relevant news from free RSS feeds (FUNDING_RSS_FEEDS in config.py) —
@@ -293,17 +302,18 @@ def find_open_roles_structured(company_name: str) -> Optional[list[dict]]:
 
 def find_open_roles(company_name: str) -> list[dict]:
     """
-    Fallback: search for open Strategy/Ops/GTM/Product roles at a specific company via Tavily.
-    Only used when find_open_roles_structured() returns None (company not on Greenhouse/Lever/Ashby).
-    Returns raw Tavily results.
+    Fallback: search for open roles matching TARGET_ROLE_KEYWORDS at a specific company via
+    Tavily. Only used when find_open_roles_structured() returns None (company not on
+    Greenhouse/Lever/Ashby). Returns raw Tavily results.
     """
     client = _get_client()
     all_results = []
     seen_urls: set[str] = set()
+    role_phrase = _role_query_phrase()
 
     queries = [
-        f"{company_name} open jobs strategy operations GTM product partnerships site:greenhouse.io OR site:lever.co OR site:ashbyhq.com OR site:jobs.lever.co OR site:boards.greenhouse.io",
-        f"{company_name} careers hiring strategy operations product manager 2026",
+        f"{company_name} open jobs {role_phrase} site:greenhouse.io OR site:lever.co OR site:ashbyhq.com OR site:jobs.lever.co OR site:boards.greenhouse.io",
+        f"{company_name} careers hiring {role_phrase} 2026",
     ]
 
     for query in queries:
@@ -370,18 +380,19 @@ def find_watchlist_roles_structured(company_name: str) -> Optional[list[dict]]:
 
 def find_watchlist_roles(company_name: str) -> list[dict]:
     """
-    Fallback: search for recently posted Strategy/Ops/GTM/Product roles at a watchlist company.
-    Only used when find_watchlist_roles_structured() returns None (company not on
+    Fallback: search for recently posted roles matching TARGET_ROLE_KEYWORDS at a watchlist
+    company. Only used when find_watchlist_roles_structured() returns None (company not on
     Greenhouse/Lever/Ashby). Uses a tight recency window (WATCHLIST_RECENCY_DAYS) so only
     genuinely new postings surface. Returns raw Tavily results.
     """
     client = _get_client()
     all_results = []
     seen_urls: set[str] = set()
+    role_phrase = _role_query_phrase()
 
     queries = [
-        f"{company_name} new job openings strategy operations GTM product partnerships site:greenhouse.io OR site:lever.co OR site:ashbyhq.com OR site:jobs.lever.co OR site:boards.greenhouse.io",
-        f"{company_name} hiring strategy operations product manager business development 2026",
+        f"{company_name} new job openings {role_phrase} site:greenhouse.io OR site:lever.co OR site:ashbyhq.com OR site:jobs.lever.co OR site:boards.greenhouse.io",
+        f"{company_name} hiring {role_phrase} 2026",
     ]
 
     for query in queries:

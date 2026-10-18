@@ -1,5 +1,5 @@
 """
-config.py — Wise Glade Configuration
+config.py — Oppo Research Configuration
 Sectors, role keywords, search queries, and run limits.
 """
 
