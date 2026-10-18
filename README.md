@@ -142,6 +142,40 @@ Edit `config.py`:
 
 Edit `profile_local.py` for your background and target roles — see step 2 above.
 
+## Repurposing for a different field or function
+
+Nothing about this agent is fintech/AI-specific by design — the whole watchlist, role
+filter, and news sources are just data in `config.py`. To retarget it:
+
+1. **`profile_local.py`** — your own background (see step 2 above).
+2. **`config.py` → `WATCHLIST_COMPANIES`** — swap in companies in your target field.
+3. **`config.py` → `TARGET_ROLE_KEYWORDS` / `EXCLUDE_ROLE_KEYWORDS`** — the actual role-title
+   filter, and the main lever. Some starting points:
+
+   | Field | Add to `TARGET_ROLE_KEYWORDS` | Watch out for in `EXCLUDE_ROLE_KEYWORDS` |
+   |---|---|---|
+   | Credit / lending | `credit`, `underwriting`, `risk`, `collections`, `lending`, `portfolio` | **Remove `analyst` and `finance`** — the defaults exclude both, which blocks most actual credit titles ("Credit Analyst," "Risk Analyst," "Finance Manager") |
+   | Comms / PR | `communications`, `comms`, `public relations`, `content`, `brand`, `corporate affairs` | Defaults don't conflict — but see the hardcoded-prompt note below |
+   | Account Executive / BD (any industry) | `account executive`, `business development`, `origination`, `sales`, `development` | Defaults don't conflict |
+
+4. **`config.py` → `FUNDING_SEARCH_QUERIES` / `FUNDING_RSS_FEEDS`** — swap to sources that
+   actually cover your field (energy/climate trade press instead of TechCrunch/CoinDesk, for
+   example). Check a feed actually returns results in a real run's logs before relying on it —
+   a dead or renamed URL is skipped silently, not fatal, but also silently gives you nothing.
+5. **`agent.py` → `parse_job_listings()`** — one hardcoded line the config lists don't reach:
+   `"Only include strategy/ops/product/GTM roles. Skip engineering, design, data science,
+   finance, legal, HR."` This only fires on the Tavily-fallback path (companies not on
+   Greenhouse/Lever/Ashby — a meaningful minority of watchlist companies in practice), but since
+   it's hardcoded independent of `TARGET_ROLE_KEYWORDS`, a credit-focused fork still needs this
+   edited (it explicitly skips "finance"), and a comms or BD/AE fork should loosen
+   "strategy/ops/product/GTM" to match their actual target roles — otherwise relevant roles get
+   filtered out on that fallback path even after `config.py` is fixed.
+6. **`config.py` → `EXCLUDE_SECTORS`** — a quick check that nothing here accidentally excludes
+   your field (none of the defaults block credit, comms, or energy, but worth a glance if you're
+   going somewhere more unusual).
+7. Test with `python agent.py --dry-run` before scheduling anything — see "Test before you
+   trust it" above.
+
 ## Files
 
 | File | Role |
