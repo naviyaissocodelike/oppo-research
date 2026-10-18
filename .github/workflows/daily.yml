@@ -1,0 +1,43 @@
+name: Wise Glade — Daily Run
+
+on:
+  schedule:
+    - cron: "0 13 * * *"   # 8:00am ET (UTC-5) / 1:00pm UTC
+  workflow_dispatch:         # allows manual trigger from GitHub UI
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Write local profile from secret (optional)
+        # Only runs if the CANDIDATE_PROFILE_PY secret is set. This lets your real profile
+        # power the scheduled run without ever being committed to the repo — paste the full
+        # contents of your local profile_local.py into a repo secret of this name
+        # (Settings → Secrets and variables → Actions → New repository secret). Forks/clones
+        # that don't set this secret just fall back to the example in profile.py.
+        if: ${{ secrets.CANDIDATE_PROFILE_PY != '' }}
+        env:
+          CANDIDATE_PROFILE_PY: ${{ secrets.CANDIDATE_PROFILE_PY }}
+        run: python -c "import os; open('profile_local.py', 'w').write(os.environ['CANDIDATE_PROFILE_PY'])"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Wise Glade
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          GMAIL_FROM: ${{ secrets.GMAIL_FROM }}
+          GMAIL_TO: ${{ secrets.GMAIL_TO }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python agent.py
